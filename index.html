@@ -18,22 +18,9 @@
             
             <div class="mt-2">
                 <label for="mode-selector">Mode</label>
-<!--                 
-                <div class="" id="mode-selector">
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="mode" id="mode-text" value="text">
-                        <label class="form-check-label" for="mode-text">Text</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="mode" id="mode-file" value="file" checked>
-                        <label class="form-check-label" for="mode-file">File</label>
-                    </div>
-                </div>
- -->
  <!-- TODO change default -->
                 <div class="form-group">
                     <select id="mode-selector" class="custom-select" required>
-
                       <option value="text" >Text</option>
                       <option value="file" selected>File</option>
                     </select>
@@ -79,15 +66,6 @@
                     <div>
                         <label for="source">Source file</label>
                     </div>
-<!--                     
-                    <input type="text" id="input-file-name" class="form-control" placeholder="" value="" required readonly>
-                    <input id="input-file" type="file"/>
-                    <button id="input-file-button" class="btn btn-primary" onclick="$('#input-file').click()">Load file...</button>
-
-
-                    Choose file...
-
- -->                    
                     <div class="custom-file">
                         <input type="file" id="input-file" class="custom-file-input" required>
                         <label id="input-file-name" class="custom-file-label" for="input-file"></label>
@@ -131,8 +109,8 @@
                     var msg = "DziCryptoApi error " + code + " with message: '" + lastError.getMessage() + "'";
                     console.error(msg);
                     lastError.reset();
-                    // throw new Error(msg);
                     alert("An error has occurred"); // TODO
+                    throw new Error(msg);
                 }
             }
 
@@ -168,11 +146,11 @@
 
 
               //  $(".alert").hide();
-                $("#alert-button").click(function() {
-                    $("#alert1").alert();
-                    // $('#alert1').alert('close');
-                    // $().alert();
-                });
+                // $("#alert-button").click(function() {
+                //     $("#alert1").alert();
+                //     // $('#alert1').alert('close');
+                //     // $().alert();
+                // });
 
                 $("#mode-selector").change(changeMode);
                 // $("input[name='mode']").change(selectMode);
@@ -231,34 +209,6 @@
                         }
                         $("#result-file-name").val(name);
                     }
-
-
-/*                    
-                    var name = currentFile.file.name;
-                    if (encryption) {
-                        currentFile.result = exec(DziCryptoApi.encryptMessage(utils.toBase64(currentFile.data), $("#pass").val(), 23));
-                        name += ".enc";
-                    } else {
-                        
-                        // if (!currentFile.data64) {
-                        //     currentFile.data64 = String.fromCharCode.apply(null, currentFile.data);
-                        // }
-                        // currentFile.result = exec(DziCryptoApi.decryptMessage(currentFile.data64, $("#pass").val()));
-                        // currentFile.result = utils.fromBase64(currentFile.result);
-                        
-                        currentFile.result = exec(DziCryptoApi.decryptMessage(utils.toBase64(currentFile.data), $("#pass").val()));
-
-                        if (name.endsWith(".enc")) {
-                            name = name.substring(0, name.length - 4);
-                        } else {
-                            name = "decrypted-" + name;
-                        }
-                    }
-                    if ($("#result-file-name").val() === "") {
-                        $("#result-file-name").val(name);
-                    }
-*/                    
-
                     $("#result-file-button").prop("disabled", false);
                 }
             }
