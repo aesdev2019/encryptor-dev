@@ -10,6 +10,7 @@
 
         <script type="text/javascript" language="javascript" src="dzicrypto-1.0.2.js"></script>
         <script src="FileSaver.js"></script>
+        <script src="waitingfor.js"></script>
       </head>
     <body>
         <div class="container">
@@ -109,7 +110,6 @@
               </div>
 
               <!-- <button id="alert-button" class="btn btn-primary">Alert</button> -->
-        
         <script>
 
             function showMessage(message, title) {
@@ -129,6 +129,7 @@
                     var msg = "DziCryptoApi error " + code + " with message: '" + lastError.getMessage() + "'";
                     console.error(msg);
                     lastError.reset();
+                    waitingDialog.hide();
                     showMessage("An error has occurred!", "Error");
                     throw new Error(msg);
                 }
@@ -164,7 +165,6 @@
                     }
                 }).hide();
 
-
                 // $("#alert-button").click(function() {
                 //     showMessage("Message", "Error");
                 // });
@@ -192,25 +192,31 @@
             function loadFile(file) {
                 var reader = new FileReader();
                 reader.onloadend = function(ev) {
-                    currentFile = {file: file, data: new Uint8Array(ev.target.result)};
+                    var data = new Uint8Array(ev.target.result);                    
+                    waitingDialog.hide();
+                    if (data.length != file.size) {
+                        showMessage("Error occurred reading file", "Error");
+                        return;
+                    }
+                    currentFile = {file: file, data: data};
                     // $("#input-file-name").val(file.name);
                     $("#input-file-name").html(file.name);
                     $("#result-file-name").val("");
                     $("#result-file-button").prop("disabled", true);
                 };
                 reader.onerror = function () { showMessage("Error occurred reading file", "Error"); }
+                waitingDialog.show("Loading file");
                 reader.readAsArrayBuffer(file);
             }
             
             function processFile(encryption) {
                 if (currentFile && currentFile.data)  {
+                    waitingDialog.show("Processing file");
                     var data64 = utils.toBase64(currentFile.data);
                     currentFile.result = utils.fromBase64(encryption 
                             ? exec(DziCryptoApi.encryptMessage(data64, $("#pass").val(), 23)) 
                             : exec(DziCryptoApi.decryptMessage(data64, $("#pass").val())));
-
-                    showMessage("File processed", "Warning");
-
+                    waitingDialog.hide();
                     if ($("#result-file-name").val() === "") { // ???
                         var name = currentFile.file.name;
                         if (encryption) {
