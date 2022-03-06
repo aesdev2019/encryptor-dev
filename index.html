@@ -6,6 +6,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
         <script type="text/javascript" language="javascript" src="dzicrypto-1.0.2.js"></script>
         <script src="FileSaver.js"></script>
       </head>
@@ -83,22 +85,40 @@
                         <label for="result">Result file</label>
                     </div>
                     <input type="text" id="result-file-name" class="form-control" placeholder="" value="" required>
-                    <div class="small">In the &laquo;Downloads&raquo; folder</div>
-                    <button id="result-file-button" class="btn btn-primary" onclick="saveFile()">Save file</button>
-
+                    <div class="mt-1">
+                        <button id="result-file-button" class="btn btn-primary" onclick="saveFile()">Save file</button>
+                    </div>
                 </div>
             </div>
 
-<!-- <div class="container">
-<div id="alert1" class="alert alert-warning alert-dismissible fade show" role="alert">
-  <strong>Holy guacamole!</strong> You should check in on some of those fields below.
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
-<button id="alert-button" class="btn btn-primary">Alert</button>
-</div>
- -->        <script>
+            <div class="modal fade" id="message-dialog" role="dialog">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h4 id="message-dialog-title" class="modal-title">Message</h4>
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                      <p id="message-dialog-body">...</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>                  
+                </div>
+              </div>
+
+              <!-- <button id="alert-button" class="btn btn-primary">Alert</button> -->
+        
+        <script>
+
+            function showMessage(message, title) {
+                $("#message-dialog-body").html(message);
+                if (title) {
+                    $("#message-dialog-title").html(title);
+                }
+                $("#message-dialog").modal();
+            }
 
             function exec(res) {
                 var lastError = DziCryptoApi.getLastError();
@@ -109,7 +129,7 @@
                     var msg = "DziCryptoApi error " + code + " with message: '" + lastError.getMessage() + "'";
                     console.error(msg);
                     lastError.reset();
-                    alert("An error has occurred"); // TODO
+                    showMessage("An error has occurred!", "Error");
                     throw new Error(msg);
                 }
             }
@@ -145,11 +165,8 @@
                 }).hide();
 
 
-              //  $(".alert").hide();
                 // $("#alert-button").click(function() {
-                //     $("#alert1").alert();
-                //     // $('#alert1').alert('close');
-                //     // $().alert();
+                //     showMessage("Message", "Error");
                 // });
 
                 $("#mode-selector").change(changeMode);
@@ -175,18 +192,13 @@
             function loadFile(file) {
                 var reader = new FileReader();
                 reader.onloadend = function(ev) {
-                    var data = new Uint8Array(ev.target.result);                    
-                    if (data.length != file.size) {
-                        window.alert("Помилка читання файлу " + file.name);
-                        return;
-                    }
-                    currentFile = {file: file, data: data};
+                    currentFile = {file: file, data: new Uint8Array(ev.target.result)};
                     // $("#input-file-name").val(file.name);
                     $("#input-file-name").html(file.name);
-
                     $("#result-file-name").val("");
                     $("#result-file-button").prop("disabled", true);
                 };
+                reader.onerror = function () { showMessage("Error occurred reading file", "Error"); }
                 reader.readAsArrayBuffer(file);
             }
             
@@ -196,6 +208,9 @@
                     currentFile.result = utils.fromBase64(encryption 
                             ? exec(DziCryptoApi.encryptMessage(data64, $("#pass").val(), 23)) 
                             : exec(DziCryptoApi.decryptMessage(data64, $("#pass").val())));
+
+                    showMessage("File processed", "Warning");
+
                     if ($("#result-file-name").val() === "") { // ???
                         var name = currentFile.file.name;
                         if (encryption) {
